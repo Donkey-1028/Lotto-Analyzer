@@ -1,15 +1,18 @@
 version: '3'
 
+volumes:
+  database: {}
+
 services:
   db:
     image: mysql:5.7
     ports:
       - '3306:3306'
     environment:
-      MYSQL_DATABASE: 'lotto-analyzer-mysql'
-      MYSQL_USER: 'admin'
-      MYSQL_PASSWORD: 'an1028'
-      MYSQL_ROOT_PASSWORD: 'an1028'
+      - MYSQL_DATABASE=lotto-analyzer-mysql
+      - MYSQL_ROOT_PASSWORD=testpassword
+    volumes:
+      - database:/var/lib/mysql
   web:
     build: .
     command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
