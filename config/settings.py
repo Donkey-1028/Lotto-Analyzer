@@ -93,7 +93,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'lotto-analyzer-mysql',
-        'USER': 'admin',
+        'USER': get_secret("MYSQL_USER"),
         'PASSWORD': get_secret("MYSQL_PASSWORD"),
         'HOST': 'db',
         'PORT': 3306,
