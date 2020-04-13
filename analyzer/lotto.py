@@ -20,7 +20,7 @@ def get_lotto_number(drwNo):
 
         return context
     else:
-        return ValueError('lotto 불러오기 실패')
+        raise ValueError('lotto 불러오기 실패')
 
 
 def get_all_lotto_number_count(final, first=1):
@@ -42,4 +42,3 @@ def get_all_lotto_number_count(final, first=1):
 
         drwNo += 1
 
-print(get_all_lotto_number_count(10))
