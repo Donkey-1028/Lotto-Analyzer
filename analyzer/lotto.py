@@ -23,14 +23,13 @@ def get_lotto_number(drwNo):
         return ValueError('lotto 불러오기 실패')
 
 
-def get_all_lotto_number_count(max_number):
-    """ 전체 회차의 번호 빈도수를 요청하기"""
-    drwNo = 1  # 회차 번호
+def get_all_lotto_number_count(final, first=1):
+    """ 전체 회차의 번호 빈도수를 요청하기, counting 정렬 활용"""
+    drwNo = first  # 시작할 회차 번호
     count_list = [0] * 46
-    url = 'http://www.nlotto.co.kr/common.do?method=getLottoNumber&drwNo='
 
     while True:
-        if drwNo == max_number:
+        if drwNo == final:
             return count_list
 
         lotto = list(get_lotto_number(drwNo).values())
@@ -38,3 +37,5 @@ def get_all_lotto_number_count(max_number):
             count_list[value] += 1
 
         drwNo += 1
+
+print(get_all_lotto_number_count(3))
