@@ -29,8 +29,12 @@ def get_all_lotto_number_count(final, first=1):
     count_list = [0] * 46
 
     while True:
-        if drwNo == final:
+        if drwNo > final:
+            print()
             return count_list
+
+        if drwNo % 10 == 0:
+            print('.', end='')
 
         lotto = list(get_lotto_number(drwNo).values())
         for index, value in enumerate(lotto):
@@ -38,4 +42,4 @@ def get_all_lotto_number_count(final, first=1):
 
         drwNo += 1
 
-print(get_all_lotto_number_count(3))
+print(get_all_lotto_number_count(10))
