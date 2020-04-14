@@ -1,9 +1,13 @@
 import requests
+
 from django.test import TestCase
+
+from .models import LottoCount
 from .lotto import get_lotto_number, get_all_lotto_number_count
 
 
 class LottoAPITest(TestCase):
+    """ lotto.py Test"""
 
     def setUp(self):
         self.test_url = 'http://www.nlotto.co.kr/common.do?method=getLottoNumber&drwNo='
@@ -15,7 +19,6 @@ class LottoAPITest(TestCase):
 
         with self.assertRaisesMessage(ValueError, 'lotto 불러오기 실패'):
             get_lotto_number(10000)
-
 
     def test_get_lotto_number_compare_requests_number(self):
         """ requests 모듈을 이용하여 불러온 로또 데이터와
@@ -36,3 +39,23 @@ class LottoAPITest(TestCase):
             all_count += value
 
         self.assertEqual(try_count * 7, all_count)
+
+
+class LottoCountTest(TestCase):
+    """ LottoCountTest Model, Manager Test"""
+
+    def setUp(self):
+        self.model = LottoCount.objects.create()
+
+    def test_update_new_lotto(self):
+        """ update_new_lotto 메소드 테스트"""
+        LottoCount.objects.update_new_lotto(self.model.id, 1)
+
+        # 제대로 update가 되었다면 ten 필드 값은 1이 됨
+        first_value = LottoCount.objects.get(id=self.model.id).ten
+
+        # 마찬가지로 1회차에는 번호 1이 없었기 때문에 필드값은 0이여야 함
+        second_value = LottoCount.objects.get(id=self.model.id).one
+
+        self.assertEqual(first_value, 1)
+        self.assertNotEqual(second_value, 1)
