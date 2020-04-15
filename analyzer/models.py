@@ -1,11 +1,8 @@
 from django.db import models
 
 from .lotto import get_lotto_number, get_all_lotto_number_count
-# Create your models here.
 
-
-class LottoCountManager(models.Manager):
-    count_word_dictionary = {
+COUNT_WORD_DICTIONARY = {
         1: 'one', 2: 'two', 3: 'three', 4: 'four', 5: 'five',
         6: 'six', 7: 'seven', 8: 'eight', 9: 'nine', 10: 'ten',
         11: 'eleven', 12: 'twelve', 13: 'thirteen', 14: 'fourteen', 15: 'fifteen',
@@ -17,19 +14,38 @@ class LottoCountManager(models.Manager):
         41: 'forty_one', 42: 'forty_two', 43: 'forty_three', 44: 'forty_four', 45: 'forty_five'
     }
 
+
+class LottoCountManager(models.Manager):
+
     def update_new_lotto(self, lotto_count_id, drwNo):
         """ 업데이트 할 로또ID와 회차번호를 파라미터로 받아서 업데이트."""
         lotto = get_lotto_number(drwNo).values()
         transaction = self.model(id=lotto_count_id)
 
         for _, value in enumerate(lotto):
-            word = self.count_word_dictionary[value]
+            word = COUNT_WORD_DICTIONARY[value]
 
             # 기존에 있던 field값을 가져오고
-            value = getattr(transaction, word)
+            field_value = getattr(transaction, word)
             # 그 값에 +1
-            value += 1
+            field_value += 1
             # 그후 그 값을 필드값으로 저장
+            setattr(transaction, word, field_value)
+
+        try:
+            transaction.save()
+        except Exception as e:
+            print('저장 에러', e)
+
+    def create_many_lotto_count(self, final, first=1):
+        lotto = get_all_lotto_number_count(final)
+        transaction = self.model(final_drwNo=final, first_drwNo=first)
+
+        for index, value in enumerate(lotto):
+            if index == 0:
+                continue
+
+            word = COUNT_WORD_DICTIONARY[index]
             setattr(transaction, word, value)
 
         try:
