@@ -2,7 +2,7 @@ import requests
 
 from django.test import TestCase
 
-from .models import LottoCount
+from .models import LottoCount, COUNT_WORD_DICTIONARY
 from .lotto import get_lotto_number, get_all_lotto_number_count
 
 
@@ -59,3 +59,23 @@ class LottoCountTest(TestCase):
 
         self.assertEqual(first_value, 1)
         self.assertNotEqual(second_value, 1)
+
+    def test_create_many_lotto_count(self):
+        """ create_many_lotto_count 테스트 """
+
+        # API를 이용해서 얻어온 로또 count list
+        api_lotto_list = get_all_lotto_number_count(10)
+        # create_many_lotto_count로 생성한 다수의 로또 count
+        LottoCount.objects.create_many_lotto_count(10)
+        model = LottoCount.objects.get(id=2)
+
+        for index, value in enumerate(api_lotto_list):
+            """ API를 이용해서 얻어온 데이터와, create_many_lotto_count를 이용해서 생성한
+            데이터가 일치하는지 테스트"""
+            if index == 0:
+                continue
+
+            word = COUNT_WORD_DICTIONARY[index]
+            field_value = getattr(model, word)
+            #  얻어온 데이터와 저장된 데이터가 같은지
+            self.assertEqual(field_value, value)
