@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'analyzer.apps.AnalyzerConfig',
+    'django_mysql',
 ]
 
 MIDDLEWARE = [
