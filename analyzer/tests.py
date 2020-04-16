@@ -46,19 +46,38 @@ class LottoCountTest(TestCase):
 
     def setUp(self):
         self.model = LottoCount.objects.create()
+        self.first_lotto_count = [10, 23, 29, 33, 37, 40, 16]  # 1회 당첨 번호
+
+    def test_update_new_lotto_with_wrong_id(self):
+        """ 존재하지 않는 LottoCount를 이용해서 update_new_lotto를 하려고 할 때 실패 테스트"""
+        with self.assertRaisesMessage(ValueError, '해당 ID의 LottoCount가 없습니다'):
+            LottoCount.objects.update_new_lotto(3, 1)
+
+    def test_update_duplicate_lotto(self):
+        """ 이미 저장된 데이터를 저장하려고 할 때 실패테스트"""
+        model = LottoCount.objects.create(drwNos=1)
+        with self.assertRaisesMessage(ValueError, '이미 저장되어 있는 회차입니다.'):
+            LottoCount.objects.update_new_lotto(model.id, 1)
 
     def test_update_new_lotto(self):
         """ update_new_lotto 메소드 테스트"""
+        api_lotto_list = get_lotto_number(1)
         LottoCount.objects.update_new_lotto(self.model.id, 1)
+        model = LottoCount.objects.get(id=self.model.id)
 
-        # 제대로 update가 되었다면 ten 필드 값은 1이 됨
-        first_value = LottoCount.objects.get(id=self.model.id).ten
+        for _, value in enumerate(api_lotto_list.values()):
+            """api로 받아온 dictionary 형태의 lotto 데이터중 value 값들을 이용하여
+            field의 값을 가져옴. 필드의 값이 1일경우 테스트 통과"""
+            word = COUNT_WORD_DICTIONARY[value]
+            field_value = getattr(model, word)
+            self.assertEqual(field_value, 1)
 
-        # 마찬가지로 1회차에는 번호 1이 없었기 때문에 필드값은 0이여야 함
-        second_value = LottoCount.objects.get(id=self.model.id).one
+    def test_update_new_lotto_drwNos(self):
+        """ update_new_lotto 메소드를 진행후 drwNos가 제대로 저장되는지"""
+        LottoCount.objects.update_new_lotto(self.model.id, 2)
+        model = LottoCount.objects.get(id=self.model.id)
 
-        self.assertEqual(first_value, 1)
-        self.assertNotEqual(second_value, 1)
+        self.assertIn(2, model.drwNos)
 
     def test_create_many_lotto_count(self):
         """ create_many_lotto_count 테스트 """
