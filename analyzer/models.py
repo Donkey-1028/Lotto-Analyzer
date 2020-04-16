@@ -1,5 +1,7 @@
 from django.db import models
 
+from django_mysql.models import SetCharField
+
 from .lotto import get_lotto_number, get_all_lotto_number_count
 
 COUNT_WORD_DICTIONARY = {
@@ -20,22 +22,33 @@ class LottoCountManager(models.Manager):
     def update_new_lotto(self, lotto_count_id, drwNo):
         """ 업데이트 할 로또ID와 회차번호를 파라미터로 받아서 업데이트."""
         lotto = get_lotto_number(drwNo).values()
-        transaction = self.model(id=lotto_count_id)
-
-        for _, value in enumerate(lotto):
-            word = COUNT_WORD_DICTIONARY[value]
-
-            # 기존에 있던 field값을 가져오고
-            field_value = getattr(transaction, word)
-            # 그 값에 +1
-            field_value += 1
-            # 그후 그 값을 필드값으로 저장
-            setattr(transaction, word, field_value)
 
         try:
-            transaction.save()
+            transaction = self.model.objects.get(id=lotto_count_id)
         except Exception as e:
-            print('저장 에러', e)
+            raise ValueError('해당 ID의 LottoCount가 없습니다')
+
+        if drwNo in transaction.drwNos:
+            # 입력받은 회차가 이미 기록된 데이터라면 ValueError 발생
+            raise ValueError('이미 저장되어 있는 회차입니다.')
+        else:
+            # 기록된 데이터가 아닐경우 drwNos에 회차 기록
+            transaction.drwNos.add(drwNo)
+
+            for _, value in enumerate(lotto):
+                word = COUNT_WORD_DICTIONARY[value]
+
+                # 기존에 있던 field값을 가져오고
+                field_value = getattr(transaction, word)
+                # 그 값에 +1
+                field_value += 1
+                # 그후 그 값을 필드값으로 저장
+                setattr(transaction, word, field_value)
+
+            try:
+                transaction.save()
+            except Exception as e:
+                print('저장 에러', e)
 
     def create_many_lotto_count(self, final, first=1):
         lotto = get_all_lotto_number_count(final)
@@ -47,6 +60,9 @@ class LottoCountManager(models.Manager):
 
             word = COUNT_WORD_DICTIONARY[index]
             setattr(transaction, word, value)
+
+        for drwNo in range(first, final+1):
+            transaction.drwNos.add(drwNo)
 
         try:
             transaction.save()
@@ -105,6 +121,12 @@ class LottoCount(models.Model):
     forty_five = models.PositiveIntegerField(default=0)
 
     objects = LottoCountManager()
+
+    drwNos = SetCharField(  # 몇회차의 번호들이 업데이트 되어있는지 확인하는 필드
+        base_field=models.IntegerField(null=True),
+        size=4,
+        max_length=(4 * 2000)
+    )
 
     def __str__(self):
         return str(self.pk) + ' LottoCount' + str(self.first_drwNo) + '-' + str(self.final_drwNo)
