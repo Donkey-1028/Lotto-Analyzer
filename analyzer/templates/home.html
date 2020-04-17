@@ -1,0 +1,7 @@
+<h1>Lotto Analyzer</h1>
+{% for number, count in lotto %}
+{% if forloop.first %}
+{% elif forloop.last %}
+{% else %} {{ number }} : {{ count }}
+{% endif %}
+{% endfor %}
