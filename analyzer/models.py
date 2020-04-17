@@ -69,6 +69,8 @@ class LottoCountManager(models.Manager):
         except Exception as e:
             print('저장 에러', e)
 
+        return transaction
+
 
 class LottoCount(models.Model):
     first_drwNo = models.PositiveIntegerField(default=0)  # 카운팅하는 로또 데이터의 시작 회수
@@ -130,3 +132,9 @@ class LottoCount(models.Model):
 
     def __str__(self):
         return str(self.pk) + ' LottoCount' + str(self.first_drwNo) + '-' + str(self.final_drwNo)
+
+    def update_first_and_final(self):
+        if len(self.drwNos) == 0:
+            raise ValueError('update 할 일자가 없습니다.')
+        self.first_drwNo = min(self.drwNos)
+        self.final_drwNo = max(self.drwNos)
