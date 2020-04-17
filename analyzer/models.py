@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 
 from django_mysql.models import SetCharField
 
@@ -138,3 +139,6 @@ class LottoCount(models.Model):
             raise ValueError('update 할 일자가 없습니다.')
         self.first_drwNo = min(self.drwNos)
         self.final_drwNo = max(self.drwNos)
+
+    def get_absolute_url(self):
+        return reverse('analyzer:show_lotto_count', args=[self.pk])
