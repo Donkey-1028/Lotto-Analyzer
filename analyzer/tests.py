@@ -98,3 +98,20 @@ class LottoCountTest(TestCase):
             field_value = getattr(model, word)
             #  얻어온 데이터와 저장된 데이터가 같은지
             self.assertEqual(field_value, value)
+
+    def test_update_first_and_final(self):
+        """ LottoCount set_first_and_final 메소드 테스트"""
+        model = LottoCount.objects.create_many_lotto_count(1)
+        LottoCount.objects.update_new_lotto(model.id, 2)
+        model = LottoCount.objects.get(id=model.id)
+
+        # 해당 메소드를 실행할 경우 first_drwNo에는 drwNos중 최솟값, final_drwNo에는 최대값으로 설정
+        model.update_first_and_final()
+
+        self.assertTrue(model.first_drwNo, 1)
+        self.assertTrue(model.final_drwNo, 2)
+
+    def test_wrong_update_first_and_final(self):
+        model = LottoCount.objects.create()
+        with self.assertRaisesMessage(ValueError, 'update 할 일자가 없습니다.'):
+            model.update_first_and_final()
