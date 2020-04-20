@@ -1,7 +1,7 @@
 from django.db import models
 from django.urls import reverse
 
-from django_mysql.models import SetCharField
+from django_mysql.models import ListCharField
 
 from .lotto import get_lotto_number, get_all_lotto_number_count
 
@@ -34,7 +34,7 @@ class LottoCountManager(models.Manager):
             raise ValueError('이미 저장되어 있는 회차입니다.')
         else:
             # 기록된 데이터가 아닐경우 drwNos에 회차 기록
-            transaction.drwNos.add(drwNo)
+            transaction.drwNos.append(drwNo)
 
             for _, value in enumerate(lotto):
                 word = COUNT_WORD_DICTIONARY[value]
@@ -50,6 +50,7 @@ class LottoCountManager(models.Manager):
                 transaction.save()
             except Exception as e:
                 print('저장 에러', e)
+        return transaction
 
     def create_many_lotto_count(self, final, first=1):
         lotto = get_all_lotto_number_count(final)
@@ -63,7 +64,7 @@ class LottoCountManager(models.Manager):
             setattr(transaction, word, value)
 
         for drwNo in range(first, final+1):
-            transaction.drwNos.add(drwNo)
+            transaction.drwNos.append(drwNo)
 
         try:
             transaction.save()
@@ -125,8 +126,8 @@ class LottoCount(models.Model):
 
     objects = LottoCountManager()
 
-    drwNos = SetCharField(  # 몇회차의 번호들이 업데이트 되어있는지 확인하는 필드
-        base_field=models.IntegerField(null=True),
+    drwNos = ListCharField(  # 몇회차의 번호들이 업데이트 되어있는지 확인하는 필드
+        base_field=models.IntegerField(blank=True, null=True),
         size=4,
         max_length=(4 * 2000)
     )
@@ -139,6 +140,7 @@ class LottoCount(models.Model):
             raise ValueError('update 할 일자가 없습니다.')
         self.first_drwNo = min(self.drwNos)
         self.final_drwNo = max(self.drwNos)
+        self.save()
 
     def get_absolute_url(self):
         return reverse('analyzer:show_lotto_count', args=[self.pk])
