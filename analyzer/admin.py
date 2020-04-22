@@ -26,10 +26,14 @@ class LottoCountAdminManager(admin.ModelAdmin):
     actions = [update_new_lotto_action]
 
     def get_urls(self):
+        """ 기존의 Admin URL에 새롭게 만든 Admin View의 URl을 추가하기위해
+        get_urls 메서드 오버라이딩"""
         urls = super().get_urls()
         my_urls = [
             path('create_lotto/', self.create_lotto, name='create_lotto'),
             path('create_index/', self.create_index, name='create_index'),
+            path('update_index/', self.update_index, name='update_index'),
+            path('update_lotto/', self.update_lotto, name='update_lotto'),
         ]
         return my_urls + urls
 
@@ -42,6 +46,19 @@ class LottoCountAdminManager(admin.ModelAdmin):
         first_drwNos = request.GET.get('first_drwNo')
         final_drwNos = request.GET.get('final_drwNo')
         LottoCount.objects.create_many_lotto_count(int(final_drwNos), int(first_drwNos))
+        return redirect('admin:analyzer_lottocount_changelist')
+
+    @method_decorator(staff_member_required)
+    def update_index(self, request):
+        lottos = LottoCount.objects.all()
+        return render(request, 'admin/update.html', {'lottos': lottos})
+
+    @method_decorator(staff_member_required)
+    def update_lotto(self, request):
+        lotto_id = request.GET.get('lotto_id', None)
+        drwNo = request.GET.get('drwNo')
+        model = LottoCount.objects.update_new_lotto(lotto_id, int(drwNo))
+        model.update_first_and_final()
         return redirect('admin:analyzer_lottocount_changelist')
 
 

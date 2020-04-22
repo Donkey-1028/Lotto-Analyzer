@@ -1,0 +1,50 @@
+{% extends 'admin/base_site.html' %}
+
+{% block title %}
+UPDATE DETAIL DRWNO
+{% endblock %}
+
+{% block usertools %}
+    {% if user.is_staff %}
+        <div id="user-tools">
+            {% block welcome-msg %}
+                Welcome
+                <strong>{% firstof user.get_short_name user.get_username %}</strong>.
+            {% endblock %}
+            {% block userlinks %}
+                <a href="{% url 'analyzer:home' %}">View Site</a> /
+                {% if user.is_staff %}
+                    {% url 'django-admindocs-docroot' as docsroot %}
+                    {% if docsroot %}
+                        <a href="{{ docsroot }}">Documentation</a> /
+                    {% endif %}
+                {% endif %}
+                {% if user.has_usable_password %}
+                    <a href="{% url 'admin:password_change' %}">Change PassWord</a> /
+                {% endif %}
+                <a href="{% url 'admin:logout' %}">Log Out</a>
+            {% endblock %}
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">home</a> &rsaquo;
+    <a href="{% url 'admin:analyzer_lottocount_changelist' %}">Analyzers</a> &rsaquo;
+    Create Lotto
+</div>
+{% endblock %}
+
+{% block content %}
+<form method="get" action="{% url 'admin:update_lotto' %}">
+    Lottos : <select name="lotto_id">
+        {% for lotto in lottos %}
+        <option value="{{ lotto.id }}">{{ lotto }}</option>
+        {% endfor %}
+    </select>
+    <br/>
+    drwNo : <input type="number" name="drwNo">
+    <input type="submit" value="확인">
+</form>
+{% endblock %}
