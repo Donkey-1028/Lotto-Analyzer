@@ -126,6 +126,13 @@ class MockRequest:
     """ Request를 위한 HttpRequest 모조 클래스"""
     def __init__(self, user=None):
         self.user = user
+        self.first_drwNo = 0
+        self.final_drwNo = 0
+        #  request.GET.get('key') 를 흉내내기 위한 클래스 속성
+        self.GET = {
+            'first_drwNo': self.first_drwNo,
+            'final_drwNo': self.final_drwNo
+        }
 
 
 class LottoCountAdminManagerTest(TestCase):
@@ -146,7 +153,7 @@ class LottoCountAdminManagerTest(TestCase):
 
     def test_create_index(self):
         """ 일반적인 URL을 이용한 AdminManager 테스트."""
-        url = reverse('admin:index')
+        url = reverse('admin:create_index')
         self.client.login(username='test_admin', password='testadminpassword')
         response = self.client.get(url)
 
@@ -170,4 +177,30 @@ class LottoCountAdminManagerTest(TestCase):
         self.client.login(username='test_user', password='testpassword')
         response = self.client.get(url)
 
+        self.assertEqual(response.status_code, 302)
+
+    def test_create_lotto_like_doc(self):
+        """ create_lotto 메소드 테스트, document에 있는 방식대로 테스트"""
+        self.request.user = self.super_user
+        self.request.first_drwNo = 1
+        self.request.final_drwNo = 1
+
+        response = self.model_admin.create_lotto(request=self.request)
+        model = LottoCount.objects.first()
+
+        self.assertIsNotNone(model)
+        self.assertEqual(response.status_code, 302)
+
+    def test_create_lotto(self):
+        """ 기존의 URL 을 이용한 create_lotto 메소드 테스트"""
+        url = reverse('admin:create_lotto')
+        data = {
+            'first_drwNo': 1,
+            'final_drwNo': 1,
+        }
+        self.client.login(username='test_admin', password='testadminpassword')
+        response = self.client.get(url, data=data)
+        model = LottoCount.objects.first()
+
+        self.assertIsNotNone(model)
         self.assertEqual(response.status_code, 302)
