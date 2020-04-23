@@ -124,14 +124,14 @@ class LottoCountTest(TestCase):
 
 class MockRequest:
     """ Request를 위한 HttpRequest 모조 클래스"""
-    def __init__(self, user=None):
+    def __init__(self, user=None, first_drwNo=None, final_drwNo=None, lotto_id=None, drwNo=None):
         self.user = user
-        self.first_drwNo = 0
-        self.final_drwNo = 0
         #  request.GET.get('key') 를 흉내내기 위한 클래스 속성
         self.GET = {
-            'first_drwNo': self.first_drwNo,
-            'final_drwNo': self.final_drwNo
+            'first_drwNo': first_drwNo,
+            'final_drwNo': final_drwNo,
+            'lotto_id': lotto_id,
+            'drwNo': drwNo
         }
 
 
@@ -140,14 +140,13 @@ class LottoCountAdminManagerTest(TestCase):
     def setUp(self):
         self.super_user = User.objects.create_superuser(username='test_admin', password='testadminpassword')
         self.user = User.objects.create_user(username='test_user', password='testpassword')
-        self.request = MockRequest()
         self.model_admin = LottoCountAdminManager(model=LottoCount, admin_site=AdminSite())
 
     def test_create_index_like_doc(self):
         """ 공식문서처럼 URL 을 이용한 테스트가 아닌 AdminManager를 통해서 테스트.
         관리자 계정으로 request할 경우 create_index 뷰가 정상적인 상태코드 반환"""
-        self.request.user = self.super_user
-        response = self.model_admin.create_index(request=self.request)
+        request = MockRequest(user=self.super_user)
+        response = self.model_admin.create_index(request=request)
 
         self.assertEqual(response.status_code, 200)
 
@@ -166,9 +165,9 @@ class LottoCountAdminManagerTest(TestCase):
         이때 HttpRequest의 build_absolute_uri 메소드를 이용해서 해당 URL이 지정된다. 하지만 앞서 정의한
         모조품 Request인 MockReuqest 클래스는 해당 메소드가 없기 때문에 build_absolute_uri 메소드가 없다고
         AttributeError 가 발생한다. """
-        self.request.user = self.user
+        request = MockRequest(user=self.user)
         with self.assertRaisesMessage(AttributeError, ''):
-            self.model_admin.create_index(request=self.request)
+            self.model_admin.create_index(request=request)
 
     def test_create_index_without_staff_permission(self):
         """ 위의 테스트와 마찬가지로 권한 없다는 status code인 401으로 예상을 했지만
@@ -181,13 +180,10 @@ class LottoCountAdminManagerTest(TestCase):
 
     def test_create_lotto_like_doc(self):
         """ create_lotto 메소드 테스트, document에 있는 방식대로 테스트"""
-        self.request.user = self.super_user
-        self.request.first_drwNo = 1
-        self.request.final_drwNo = 1
+        request = MockRequest(user=self.super_user, first_drwNo=1, final_drwNo=1)
 
-        response = self.model_admin.create_lotto(request=self.request)
+        response = self.model_admin.create_lotto(request=request)
         model = LottoCount.objects.first()
-
         self.assertIsNotNone(model)
         self.assertEqual(response.status_code, 302)
 
@@ -204,3 +200,44 @@ class LottoCountAdminManagerTest(TestCase):
 
         self.assertIsNotNone(model)
         self.assertEqual(response.status_code, 302)
+
+    def test_update_index_like_doc(self):
+        """ update_index 테스트"""
+        request = MockRequest(user=self.super_user)
+        response = self.model_admin.update_index(request=request)
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_update_index(self):
+        """ update_index 테스트"""
+        url = reverse('admin:update_index')
+        self.client.login(username='test_admin', password='testadminpassword')
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_update_lotto_like_doc(self):
+        """ update_lotto 메서드 document 방식대로 테스트"""
+        model = LottoCount.objects.create_many_lotto_count(1)
+        request = MockRequest(user=self.super_user, lotto_id=model.id, drwNo=2)
+        self.model_admin.update_lotto(request=request)
+        model = LottoCount.objects.get(id=model.id)
+
+        self.assertEqual(model.first_drwNo, 1)
+        self.assertEqual(model.final_drwNo, 2)
+
+    def test_update_lotto(self):
+        """ 기존의 URL 을 이용한 update_lotto 메서드 테스트"""
+        url = reverse('admin:update_lotto')
+        model = LottoCount.objects.create_many_lotto_count(1)
+        data = {
+            'lotto_id': model.id,
+            'drwNo': 2
+        }
+        self.client.login(username='test_admin', password='testadminpassword')
+        self.client.get(url, data=data)
+        model = LottoCount.objects.get(id=model.id)
+        model.update_first_and_final()
+
+        self.assertEqual(model.first_drwNo, 1)
+        self.assertEqual(model.final_drwNo, 2)
