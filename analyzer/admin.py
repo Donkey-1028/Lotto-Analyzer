@@ -10,20 +10,21 @@ from django.utils import timezone
 from .models import LottoCount
 
 
-current = timezone.localtime(timezone.now()).date()
-result = datetime.datetime(2002, 12, 7).date()
-DRWNO = (current - result) // 7
-
-
 def update_new_lotto_action(modeladmin, request, queryset):
-    """ 최신 Lotto 번호 update action"""
+    """ 최신 Lotto 번호 update action
+    현재 날짜와 Lotto가 시작한 날짜를 뺀후 해당 값을 7로 나누면 최신의 회차가 나옴"""
+    now_date = timezone.localtime(timezone.now()).date()
+    lotto_start_date = datetime.datetime(2002, 12, 7).date()
+    subtract = (now_date - lotto_start_date) // 7
+    DRWNO = subtract.days+1
+
     for query in queryset:
         LottoCount.objects.update_new_lotto(query.id, DRWNO)
         model = LottoCount.objects.get(id=query.id)
         model.update_first_and_final()
 
 
-update_new_lotto_action.short_description = 'Update No.%d Lotto Count' % (DRWNO.days + 1)
+update_new_lotto_action.short_description = 'Update New Lotto Count'
 
 
 class LottoCountAdminManager(admin.ModelAdmin):
