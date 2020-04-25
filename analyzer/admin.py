@@ -16,7 +16,16 @@ def update_new_lotto_action(modeladmin, request, queryset):
     now_date = timezone.localtime(timezone.now()).date()
     lotto_start_date = datetime.datetime(2002, 12, 7).date()
     subtract = (now_date - lotto_start_date) // 7
-    DRWNO = subtract.days+1
+
+    DRWNO = 0
+    if now_date.weekday() == 5:
+        """ 토요일이 될 경우 자연스레 다음 회차를 구하게 되는데.
+        토요일이 되자마자 다음회차가 나오는것이 아니기 때문에.
+        즉 lotto 추첨이 되지 않은 오후8시 이전에는 기존 회차에 +1 을 할 경우
+        에러가 발생, 그러한 경우 예외 처리"""
+        DRWNO = subtract.days
+    else:
+        DRWNO = subtract.days+1
 
     for query in queryset:
         LottoCount.objects.update_new_lotto(query.id, DRWNO)
