@@ -37,9 +37,15 @@ update_new_lotto_action.short_description = 'Update New Lotto Count'
 
 
 class LottoCountAdminManager(admin.ModelAdmin):
-    list_display = ['id', 'first_drwNo', 'final_drwNo']
+    list_display = ['id', 'first_drwNo', 'final_drwNo', 'get_len_drwNos']
     change_list_template = 'admin/change_list_template.html'
     actions = [update_new_lotto_action]
+
+    def get_len_drwNos(self, obj):
+        """ 첫번째 회차 번호화 마지막 회차 번호로만으로는 몇개의 회차가 포함된 Count인지 구분하기 어려움.
+        이를 극복하기 위해 drwNos의 길이를 통해 업데이트 된 회차가 몇개인지 출력."""
+        return len(obj.drwNos)
+    get_len_drwNos.short_description = 'Count된 회차 갯수'
 
     def get_urls(self):
         """ 기존의 Admin URL에 새롭게 만든 Admin View의 URl을 추가하기위해
