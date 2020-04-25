@@ -127,9 +127,10 @@ class LottoCount(models.Model):
     objects = LottoCountManager()
 
     drwNos = ListCharField(  # 몇회차의 번호들이 업데이트 되어있는지 확인하는 필드
-        base_field=models.IntegerField(blank=True, null=True),
+        base_field=models.IntegerField(),
         size=4,
-        max_length=(4 * 2000)
+        max_length=(4 * 2000),
+        blank=True
     )
 
     def __str__(self):
