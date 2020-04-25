@@ -241,3 +241,17 @@ class LottoCountAdminManagerTest(TestCase):
 
         self.assertEqual(model.first_drwNo, 1)
         self.assertEqual(model.final_drwNo, 2)
+
+    def test_update_new_lotto_action(self):
+        """ update_new_lotto action 테스트"""
+        url = reverse('admin:analyzer_lottocount_changelist')
+        model = LottoCount.objects.create_many_lotto_count(1)
+        self.client.login(username='test_admin', password='testadminpassword')
+        data = {
+            'action': 'update_new_lotto_action',
+            '_selected_action': model.id
+        }
+        self.client.post(url, data)
+        model = LottoCount.objects.get(id=model.id)
+
+        self.assertEqual(len(model.drwNos), 2)
