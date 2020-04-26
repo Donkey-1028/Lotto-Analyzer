@@ -6,9 +6,9 @@ from .models import LottoCount
 
 def home(request):
     lotto = LottoCount.objects.filter(id=4).values()[0]  # 전체보기로 지정된 object
-    lotto_count = [value for _, value in enumerate(lotto.values())]
-    lotto_number = [value for _, value in enumerate(lotto.keys())]
-    return render(request, 'home.html', {'lotto': zip(lotto_number, lotto_count)})
+    data = [value for index, value in enumerate(lotto.values()) if 2 < index < len(lotto.values()) - 1]
+    labels = [value for index, value in enumerate(lotto.keys()) if 2 < index < len(lotto.keys()) - 1]
+    return render(request, 'home.html', {'labels': labels, 'data': data})
 
 
 class ShowLottoCount(DetailView):
