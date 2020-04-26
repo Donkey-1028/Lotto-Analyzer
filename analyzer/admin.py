@@ -37,7 +37,9 @@ update_new_lotto_action.short_description = 'Update New Lotto Count'
 
 
 class LottoCountAdminManager(admin.ModelAdmin):
-    list_display = ['id', 'first_drwNo', 'final_drwNo', 'get_len_drwNos']
+    list_display = ['id', 'first_drwNo', 'final_drwNo', 'get_len_drwNos',
+                    'all', 'a_year', 'six_months', 'three_months', 'a_month']
+    list_editable = ['all', 'a_year', 'six_months', 'three_months', 'a_month']
     change_list_template = 'admin/change_list_template.html'
     actions = [update_new_lotto_action]
 

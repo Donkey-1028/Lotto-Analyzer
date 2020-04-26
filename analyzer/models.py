@@ -133,6 +133,13 @@ class LottoCount(models.Model):
         blank=True
     )
 
+    # 해당되는 항목의 데이터일 경우 True.
+    all = models.BooleanField(default=False)  # 메인 데이터 인지?
+    a_year = models.BooleanField(default=False)  # 1년 데이터 인지?
+    six_months = models.BooleanField(default=False)  # 최근 6개월 데이터
+    three_months = models.BooleanField(default=False)  # 최근 3개월 데이터 인지?
+    a_month = models.BooleanField(default=False)  # 최근 한달 데이터 인지?
+
     def __str__(self):
         return str(self.pk) + ' LottoCount' + str(self.first_drwNo) + '-' + str(self.final_drwNo)
 
