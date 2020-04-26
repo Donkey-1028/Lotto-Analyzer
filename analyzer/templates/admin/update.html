@@ -12,7 +12,7 @@ UPDATE DETAIL DRWNO
                 <strong>{% firstof user.get_short_name user.get_username %}</strong>.
             {% endblock %}
             {% block userlinks %}
-                <a href="{% url 'analyzer:home' %}">View Site</a> /
+                <a href="{% url 'analyzer:index' %}">View Site</a> /
                 {% if user.is_staff %}
                     {% url 'django-admindocs-docroot' as docsroot %}
                     {% if docsroot %}

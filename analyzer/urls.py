@@ -1,10 +1,10 @@
 from django.urls import path
 
-from .views import ShowLottoCount, home
+from .views import Index, show_all_lotto_count
 
 app_name = 'analyzer'
 
 urlpatterns = [
-    path('home/', home, name='home'),
-    path('show/<pk>/', ShowLottoCount.as_view(), name='show_lotto_count'),
+    path('all/', show_all_lotto_count, name='all'),
+    path('index/', Index.as_view(), name='index'),
 ]
