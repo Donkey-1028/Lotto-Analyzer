@@ -10,33 +10,20 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
-import os, json
-from django.core.exceptions import ImproperlyConfigured
-
+import os
+from .secrets import get_secret, get_file
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# 비밀정보들 분리한 것을 불러오는 코드
-secrets_file = os.path.join(BASE_DIR, 'config/secrets.json')
-
-with open(secrets_file) as f:
-    secrets = json.loads(f.read())
-
-
-def get_secret(setting, secrets=secrets):
-    """비밀 변수를 가져오거나 명시적 예외를 반환한다."""
-    try:
-        return secrets[setting]
-    except KeyError:
-        error_msg = "Set the {} environment variable".format(setting)
-        raise ImproperlyConfigured(error_msg)
+# 비밀 변수를 가지고있는 파일
+secrets_file = get_file()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = get_secret("SECRET_KEY")
+SECRET_KEY = get_secret("SECRET_KEY", secrets_file)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -95,8 +82,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'lotto-analyzer-mysql',
-        'USER': get_secret("MYSQL_USER"),
-        'PASSWORD': get_secret("MYSQL_PASSWORD"),
+        'USER': get_secret("MYSQL_USER", secrets_file),
+        'PASSWORD': get_secret("MYSQL_PASSWORD", secrets_file),
         'HOST': 'db',
         'PORT': 3306,
     }
