@@ -2,3 +2,4 @@ django==3.0
 mysqlclient==1.4.6
 requests
 Django-MySQL
+mysql-connector-python==8.0.19
