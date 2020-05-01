@@ -8,4 +8,5 @@
     shell 이용해서 LOTTO 데이터 추가하기.
     1.python manage.py shell
     2.import mysql.connector
+    3.from analyzer.lotto import get_all_lotto_number_count
     3.exec(open('analyzer/insert_mysql.py').read())
