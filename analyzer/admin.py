@@ -10,14 +10,13 @@ from django.utils import timezone
 from .models import LottoCount
 
 
-def update_new_lotto_action(modeladmin, request, queryset):
-    """ 최신 Lotto 번호 update action
-    현재 날짜와 Lotto가 시작한 날짜를 뺀후 해당 값을 7로 나누면 최신의 회차가 나옴"""
+def get_new_drwNo():
+    """ 최신 회차 번호 계산하는 함수.
+    (현재시간 - 로또시작 시간) / 7 을 할 경우 현재 회차를 알 수 있음. """
     now_date = timezone.localtime(timezone.now()).date()
     lotto_start_date = datetime.datetime(2002, 12, 7).date()
     subtract = (now_date - lotto_start_date) // 7
 
-    DRWNO = 0
     if now_date.weekday() == 5:
         """ 토요일이 될 경우 자연스레 다음 회차를 구하게 되는데.
         토요일이 되자마자 다음회차가 나오는것이 아니기 때문에.
@@ -25,7 +24,14 @@ def update_new_lotto_action(modeladmin, request, queryset):
         에러가 발생, 그러한 경우 예외 처리"""
         DRWNO = subtract.days
     else:
-        DRWNO = subtract.days+1
+        DRWNO = subtract.days + 1
+
+    return DRWNO
+
+
+def update_new_lotto_action(modeladmin, request, queryset):
+    """ 최신 Lotto 번호 update action"""
+    DRWNO = get_new_drwNo()
 
     for query in queryset:
         LottoCount.objects.update_new_lotto(query.id, DRWNO)
