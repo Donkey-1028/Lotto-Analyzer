@@ -2,6 +2,7 @@ import mysql.connector
 
 from config.secrets import get_secret, get_file
 from analyzer.lotto import get_all_lotto_number_count
+from analyzer.admin import get_new_drwNo
 
 
 def convert_to_mysql_data(final, first=1):
@@ -66,4 +67,5 @@ def insert(data):
     cnx.close()
 
 
-insert(convert_to_mysql_data(908))
+new_drwNo = get_new_drwNo()
+insert(convert_to_mysql_data(new_drwNo))
