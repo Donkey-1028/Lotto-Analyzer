@@ -1,9 +1,10 @@
+import time
 import requests
 
 
 def get_lotto_number(drwNo):
     """ 회차에 따른 당첨번호와 보너스 번호 요청"""
-    url = 'http://www.nlotto.co.kr/common.do?method=getLottoNumber&drwNo=' + str(drwNo)
+    url = 'https://www.nlotto.co.kr/common.do?method=getLottoNumber&drwNo=' + str(drwNo)
     req = requests.get(url)
     res = req.json()
 
@@ -25,20 +26,31 @@ def get_lotto_number(drwNo):
 
 def get_all_lotto_number_count(final, first=1):
     """ 전체 회차의 번호 빈도수를 요청하기, counting 정렬 활용"""
-    drwNo = first  # 시작할 회차 번호
+
+    # 시작할 회차 번호
+    drwNo = first
+    # counting 정렬을 위한 list, 첫번째 인덱스는 버리고 사용해야함. 0이라는 로또번호는 없기 때문.
     count_list = [0] * 46
 
     while True:
         if drwNo > final:
-            print()
+            print(drwNo-1, ' ok')
             return count_list
 
         if drwNo % 10 == 0:
-            print('.', end='')
+            print(drwNo, ' ok')
 
-        lotto = list(get_lotto_number(drwNo).values())
-        for index, value in enumerate(lotto):
-            count_list[value] += 1
+        # Lotto 요청이 짧은 시간에 많을 경우 connection 을 거부해버림. 그렇기에 딜레이가 필요함
+        if drwNo % 50 == 0:
+            time.sleep(10)
+
+        try:
+            lotto = list(get_lotto_number(drwNo).values())
+        except Exception as e:
+            print(e)
+            return count_list
+        else:
+            for index, value in enumerate(lotto):
+                count_list[value] += 1
 
         drwNo += 1
-
